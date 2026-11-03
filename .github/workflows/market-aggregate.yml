@@ -1,0 +1,19 @@
+name: market-aggregate
+# UNVERIFIED. Daily: pull counts from the Market Worker, write exp/E-id/results.yaml, commit. Stops (no billing) if the Worker is capped.
+# Needs repo secrets MARKET_WORKER_URL and EXPORT_KEY. Free: GitHub Actions minutes are free on public repos.
+on:
+  schedule: [{ cron: "17 3 * * *" }]
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -fsS "${{ secrets.MARKET_WORKER_URL }}/export?key=${{ secrets.EXPORT_KEY }}" -o export.json
+      - run: node worker/aggregate/aggregate.mjs export.json . "$(date -u +%F)"
+      - run: |
+          git config user.name "marketlab-bot"; git config user.email "bot@users.noreply.github.com"
+          git add exp/*/results.yaml
+          git diff --cached --quiet || (git commit -m "bot: results $(date -u +%F)" && git push)

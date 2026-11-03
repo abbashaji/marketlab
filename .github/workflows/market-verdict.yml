@@ -1,0 +1,25 @@
+name: market-verdict
+# UNVERIFIED in a live repo. Runs verdict.py (protected) after results.yaml changes, and rank.py after signals change.
+on:
+  push:
+    branches: [main]
+    paths: ["exp/*/results.yaml", "research/signals/**", "research/rank_inputs.yaml"]
+permissions:
+  contents: write
+concurrency: market-verdict
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - run: pip install pyyaml
+      - name: ranking
+        run: python acceptance/rank.py --write
+      - name: verdicts
+        run: for d in exp/E-*/; do [ -f "$d/results.yaml" ] && python acceptance/verdict.py "${d%/}" --write; done; true
+      - name: commit
+        run: |
+          git config user.name "marketlab-bot"; git config user.email "bot@users.noreply.github.com"
+          git add research/ranking.json exp/*/verdict.json || true
+          git diff --cached --quiet || (git commit -m "bot: ranking and verdicts" && git push)
