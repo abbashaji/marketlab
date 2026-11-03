@@ -1,0 +1,20 @@
+name = "marketlab-collector"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+[vars]
+EXPERIMENTS = "E-001,E-002,E-003"
+# Declared primary-success kind per experiment (matched against payload.kind).
+SUCCESS_KINDS = "E-001:use_case,E-002:pilot,E-003:template"
+ALLOWED_ORIGINS = "https://marketlab.pages.dev"
+DAILY_CAP = "2000"
+VISITOR_CAP = "60"
+# EXPORT_KEY is a secret: run `wrangler secret put EXPORT_KEY`. Never put it in [vars].
+
+[[d1_databases]]
+binding = "DB"
+database_name = "marketlab"
+database_id = "REPLACE_WITH_D1_ID"
+
+[triggers]
+crons = ["17 3 * * *"]
