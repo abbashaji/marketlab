@@ -1,8 +1,8 @@
 # Stop rules, fixed before launch.
-experiment_id: EXPERIMENT_ID
-max_days: 14
-max_visitors: 500
-kill_if:
-  - "after 100 consented visitors, action_rate is below failure_threshold in prediction.yaml"
-  - "any complaint about privacy or misleading wording (take the page down first, investigate after)"
-on_kill: "take the page offline, record the result in the experiment log, do not extend"
+experiment: EXPERIMENT_ID
+stop_if:
+  - spend_exceeds_usd: 0
+  - days_elapsed: 14
+  - visitors_exceed: 500
+  - complaint_about_privacy_or_wording: true
+on_stop: "take the page offline, record the result, do not extend"

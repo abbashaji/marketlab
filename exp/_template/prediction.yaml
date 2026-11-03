@@ -1,10 +1,12 @@
 # Written BEFORE traffic. Do not edit after launch.
-experiment_id: EXPERIMENT_ID
+experiment: EXPERIMENT_ID
 hypothesis: H-000
 written_on: YYYY-MM-DD
-metric: action_rate        # actions / unique visitors who gave consent
-expected_visitors: 200
-expected_rate: 0.05        # best guess
-success_threshold: 0.03    # at or above this the hypothesis survives
-failure_threshold: 0.01    # below this the hypothesis is rejected
+primary_metric: action_rate   # actions / unique consenting visitors
+rung: interest                # evidence rung; 'money' is not allowed (free rule)
+predicted_rate: 0.05          # best guess
+min_worthwhile_rate: 0.03     # at or above this the hypothesis survives
+min_exposure: 100             # consenting visitors needed before judging
+max_exposure: 500
+deadline_days: 14
 notes: "One sentence on why these numbers."
