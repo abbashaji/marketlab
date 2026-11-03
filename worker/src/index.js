@@ -116,3 +116,123 @@ async function store(env, row) {
     .run();
   return 204;
 }
+
+async function handleEvent(req, env) {
+  const body = await readJson(req);
+  checkCommon(body, env);
+  if (typeof body.type !== "string" || !WORD_RE.test(body.type)) throw new HttpError(400, "invalid type");
+  if (body.source != null && !(typeof body.source === "string" && SOURCE_RE.test(body.source))) {
+    throw new HttpError(400, "invalid source");
+  }
+  const ts = cleanTs(body.ts, Date.now());
+  let id = body.id;
+  if (id == null) id = `${body.visitor}:${body.type}:${ts}`;
+  if (typeof id !== "string" || !EVENT_ID_RE.test(id)) throw new HttpError(400, "invalid id");
+  return store(env, {
+    id, experiment: body.experiment, visitor: body.visitor, type: body.type,
+    source: body.source, ts,
+  });
+}
+
+async function handleAction(req, env, forcedKind) {
+  const body = await readJson(req);
+  checkCommon(body, env);
+  const kind = forcedKind || body.kind;
+  if (typeof kind !== "string" || !WORD_RE.test(kind)) throw new HttpError(400, "invalid kind");
+  if (typeof body.id !== "string" || !EVENT_ID_RE.test(body.id)) throw new HttpError(400, "invalid id");
+  const payload = body.payload == null ? {} : body.payload;
+  if (typeof payload !== "object" || Array.isArray(payload)) throw new HttpError(400, "invalid payload");
+  let success = false;
+  if (!forcedKind) {
+    const declared = successKinds(env)[body.experiment];
+    success = !!declared && payload.kind === declared;
+    if (success && declared === "use_case") success = wordCount(payload.text) >= 50;
+  }
+  return store(env, {
+    id: body.id, experiment: body.experiment, visitor: body.visitor,
+    type: forcedKind ? "interview" : "action", kind, payload: JSON.stringify(payload),
+    success, ts: body.ts,
+  });
+}
+
+function safeEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+async function handleExport(url, env, headers) {
+  const key = url.searchParams.get("key");
+  if (!env.EXPORT_KEY || !safeEqual(key, String(env.EXPORT_KEY))) {
+    return reply(403, headers, { error: "forbidden" });
+  }
+  const res = await env.DB.prepare(
+    "SELECT experiment, visitor, type, source, success, ts FROM events ORDER BY ts ASC"
+  ).all();
+  const out = {};
+  for (const e of list(env.EXPERIMENTS)) {
+    out[e] = { qualified_visits: 0, primary_successes: 0, by_source: {}, first_event: null };
+  }
+  const visits = {};
+  const qualified = {};
+  for (const r of res.results || []) {
+    const o = out[r.experiment];
+    if (!o) continue;
+    if (o.first_event === null || r.ts < o.first_event) o.first_event = r.ts;
+    if (r.success) o.primary_successes += 1;
+    const vk = r.experiment + "|" + r.visitor;
+    if (r.type === "visit" && !(vk in visits)) visits[vk] = r.source || "direct";
+    if (r.type === "view" && vk in visits && !qualified[vk]) {
+      qualified[vk] = true;
+      o.qualified_visits += 1;
+      o.by_source[visits[vk]] = (o.by_source[visits[vk]] || 0) + 1;
+    }
+  }
+  return reply(200, headers, out);
+}
+
+async function route(req, env) {
+  const url = new URL(req.url);
+  const headers = corsHeaders(req, env);
+  const path = url.pathname;
+  const method = req.method;
+  if (method === "OPTIONS") {
+    checkOrigin(req, env);
+    return reply(204, headers);
+  }
+  if (method === "GET" && path === "/health") return reply(200, headers, { ok: true });
+  if (method === "GET" && path === "/export") return handleExport(url, env, headers);
+  if (method === "POST" && (path === "/e" || path === "/action" || path === "/interview")) {
+    checkOrigin(req, env);
+    let status;
+    if (path === "/e") status = await handleEvent(req, env);
+    else if (path === "/action") status = await handleAction(req, env, null);
+    else status = await handleAction(req, env, "interview");
+    if (status === 429) return reply(429, headers, { error: "daily cap reached" });
+    return reply(204, headers);
+  }
+  if (method === "DELETE" && path.startsWith("/visitor/")) {
+    checkOrigin(req, env);
+    const id = decodeURIComponent(path.slice("/visitor/".length));
+    if (!VISITOR_RE.test(id)) throw new HttpError(400, "invalid visitor");
+    await env.DB.prepare("DELETE FROM events WHERE visitor = ?").bind(id).run();
+    return reply(204, headers);
+  }
+  throw new HttpError(404, "not found");
+}
+
+export default {
+  async fetch(req, env) {
+    try {
+      return await route(req, env);
+    } catch (e) {
+      const headers = corsHeaders(req, env);
+      if (e instanceof HttpError) return reply(e.status, headers, { error: e.message });
+      return reply(500, headers, { error: "internal error" });
+    }
+  },
+  async scheduled(evt, env) {
+    await env.DB.prepare("DELETE FROM events WHERE created < ?").bind(Date.now() - RETENTION_MS).run();
+  },
+};
