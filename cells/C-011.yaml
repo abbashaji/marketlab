@@ -1,0 +1,22 @@
+id: C-011
+title: 'Aggregator: counts to results.yaml'
+type: normal
+goal: |-
+  Pure Node script worker/aggregate/aggregate.mjs: takes the /export JSON and an experiment id list, writes exp/E-id/results.yaml
+  (experiment, as_of, started_on, first_event, qualified_visits, primary_successes, by_source). Never writes any other path.
+inputs:
+- from: C-010
+  kind: contract
+  contract: 'GET /export?key=... returns {"E-001": {qualified_visits:int, primary_successes:int, by_source:{str:int}, first_event: ISO-8601 or null}, ...}'
+provides:
+- 'worker/aggregate/aggregate.mjs: node aggregate.mjs <export.json> <repo-root> <as_of YYYY-MM-DD>; started_on = date of first_event'
+read:
+- docs/decisions.md
+allowed_paths:
+- worker/aggregate/**
+outputs:
+- worker/aggregate/aggregate.mjs
+- worker/aggregate/aggregate.test.mjs
+acceptance:
+- cmd: node --test worker/aggregate/aggregate.test.mjs
+notes: 'Output YAML must match acceptance/verdict.py inputs: keys experiment, as_of, started_on, first_event, qualified_visits, primary_successes, by_source.'

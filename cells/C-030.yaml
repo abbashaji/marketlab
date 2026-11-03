@@ -1,0 +1,29 @@
+id: C-030
+title: Public repo README and Pages index
+type: normal
+goal: |-
+  Write README.md (what Blueprint is, honest status, links to the three experiment pages) and site/index.html (GitHub Pages index linking to
+  exp/E-001/site, E-002, E-003). Same honesty and no-claims rules as the experiments.
+inputs:
+- from: C-020
+  kind: implementation
+  contract: exp/E-001/site/index.html exists
+- from: C-021
+  kind: implementation
+  contract: exp/E-002/site/index.html exists
+- from: C-022
+  kind: implementation
+  contract: exp/E-003/site/index.html exists
+read:
+- docs/decisions.md
+allowed_paths:
+- README.md
+- site/**
+outputs:
+- README.md
+- site/index.html
+acceptance:
+- cmd: test -s README.md
+- cmd: test -s site/index.html
+- cmd: '! grep -Eiq ''stripe|paypal|googletagmanager'' site/index.html'
+notes: GitHub Pages must be enabled once by the owner (Settings > Pages). Do not claim users, stars or endorsements.

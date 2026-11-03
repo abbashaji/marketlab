@@ -1,0 +1,29 @@
+id: C-000
+title: Experiment template (skeleton)
+type: skeleton
+goal: |-
+  Build exp/_template/: landing page with consent, privacy, disclosure and honesty blocks; a tracking snippet that
+  reads MARKET_WORKER_URL; example prediction.yaml, kill.yaml, hypothesis.md. All experiments start from it.
+lease_minutes: 15
+provides:
+- 'exp/_template/site/index.html: attributes data-privacy-notice, data-consent, data-disclosure, data-honesty, data-ai-disclosure; placeholder MARKET_WORKER_URL, EXPERIMENT_ID'
+- 'exp/_template/site/track.js: window.mlTrack(type, payload) -> POST {MARKET_WORKER_URL}/e; mlAction(payload) -> POST /action; only after consent'
+read:
+- docs/decisions.md
+allowed_paths:
+- exp/_template/hypothesis.md
+- exp/_template/prediction.yaml
+- exp/_template/kill.yaml
+- exp/_template/site/**
+outputs:
+- exp/_template/hypothesis.md
+- exp/_template/prediction.yaml
+- exp/_template/kill.yaml
+- exp/_template/site/index.html
+- exp/_template/site/track.js
+acceptance:
+- cmd: python acceptance/check_experiment.py exp/_template
+notes: |-
+  Page: no third-party hosts, no payment wording, no trackers (see acceptance/check_experiment.py). track.js sends only
+  experiment id, pseudonymous first-party visitor id (random, localStorage), event type, timestamp, source tag (?src=). No IP handling.
+  The page contains the words 'early access' so the honesty block must say: Status, Expected <date>, Nothing is charged.

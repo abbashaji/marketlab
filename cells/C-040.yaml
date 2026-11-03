@@ -1,0 +1,33 @@
+id: C-040
+title: 'Integration: pages vs Worker wiring'
+type: integration
+goal: |-
+  Write worker/integration/wiring.test.mjs: for exp/_template and every exp/E-*/site, assert the page/track.js only calls POST /e, POST /action,
+  POST /interview on MARKET_WORKER_URL, that every experiment id in prediction.yaml is accepted by the Worker's experiment allowlist
+  (worker/wrangler.toml var EXPERIMENTS), and that aggregate.mjs output keys match what acceptance/verdict.py reads.
+inputs:
+- from: C-010
+  kind: implementation
+  contract: merged
+- from: C-011
+  kind: implementation
+  contract: merged
+- from: C-020
+  kind: implementation
+  contract: merged
+- from: C-021
+  kind: implementation
+  contract: merged
+- from: C-022
+  kind: implementation
+  contract: merged
+read:
+- docs/decisions.md
+allowed_paths:
+- worker/integration/**
+outputs:
+- worker/integration/wiring.test.mjs
+acceptance:
+- cmd: node --test worker/integration/wiring.test.mjs
+- cmd: python acceptance/verdict.py --help || true
+notes: If wrangler.toml EXPERIMENTS does not list E-001,E-002,E-003, call cell_signal feedback (C-010 owns that file); do not edit it.

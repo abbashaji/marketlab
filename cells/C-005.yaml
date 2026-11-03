@@ -1,0 +1,31 @@
+id: C-005
+title: Ranking inputs and aggregate check
+type: normal
+goal: |-
+  Write research/rank_inputs.yaml with, for each of H-001..H-003: reachability (0-5, via free channels), team_edge (0-5), build_days,
+  and a one-line 'reason' for each score. The gate runs the aggregate research checks and rank.py --check.
+inputs:
+- from: C-001
+  kind: implementation
+  contract: research/signals/*.jsonl or competitors.md exist and passed their own checks.
+- from: C-002
+  kind: implementation
+  contract: research/signals/*.jsonl or competitors.md exist and passed their own checks.
+- from: C-003
+  kind: implementation
+  contract: research/signals/*.jsonl or competitors.md exist and passed their own checks.
+- from: C-004
+  kind: implementation
+  contract: research/signals/*.jsonl or competitors.md exist and passed their own checks.
+read:
+- docs/decisions.md
+allowed_paths:
+- research/rank_inputs.yaml
+outputs:
+- research/rank_inputs.yaml
+acceptance:
+- cmd: python acceptance/check_research.py aggregate
+- cmd: python acceptance/rank.py --check
+notes: |-
+  Reachability counts only free channels (public repo, Pages, directories, allowed community contributions). Team edge is agreed by the team: use 3 and say so in 'reason' unless docs/decisions.md says otherwise.
+  If the aggregate check fails (too few signals, domain over 40%), call cell_signal feedback with the shortfall; do not edit signal files (not allowed).

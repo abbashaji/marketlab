@@ -1,0 +1,35 @@
+id: C-022
+title: 'Experiment E-003: free template pack after a 50-word use case'
+type: normal
+goal: |-
+  Build exp/E-003/ from exp/_template: hypothesis.md ('For [segment], [problem] matters enough that they will [action]'),
+  prediction.yaml (primary metric: a written use case of 50 words or more; rung: costly_action; numeric predicted_rate, min_worthwhile_rate, min_exposure, max_exposure, deadline_days 30-60),
+  kill.yaml (must include spend_exceeds_usd: 0 and days_elapsed), site/index.html, channels/plan.md (free channels in order with each channel's rules
+  checked and a cap of 3 external actions per day).
+inputs:
+- from: C-000
+  kind: implementation
+  contract: exp/_template/** as described by its provides lines
+- from: C-005
+  kind: implementation
+  contract: research/rank_inputs.yaml and research signals exist; use them to set predicted_rate and the audience (developers and heavy AI chat users who hit usage limits)
+- from: C-010
+  kind: contract
+  contract: Worker endpoints /e, /action, /interview; page reads MARKET_WORKER_URL and EXPERIMENT_ID placeholders
+read:
+- docs/decisions.md
+allowed_paths:
+- exp/E-003/hypothesis.md
+- exp/E-003/prediction.yaml
+- exp/E-003/kill.yaml
+- exp/E-003/site/**
+- exp/E-003/channels/**
+outputs:
+- exp/E-003/hypothesis.md
+- exp/E-003/prediction.yaml
+- exp/E-003/kill.yaml
+- exp/E-003/site/index.html
+- exp/E-003/channels/plan.md
+acceptance:
+- cmd: python acceptance/check_experiment.py exp/E-003
+notes: 'Nothing is charged; no payment links; no testimonials or user counts without a data-source file. Never write results.yaml or verdict.json (protected). Set experiment: E-003 in prediction.yaml. Prediction and kill rule are locked by git history once merged: get them right the first time.'

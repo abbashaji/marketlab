@@ -1,0 +1,16 @@
+id: C-004
+title: Competitor and price map
+type: normal
+goal: |-
+  Write research/competitors.md. One '## H-001' / '## H-002' / '## H-003' section each. Under each, at least 10 bullet lines
+  (products, services or manual workarounds). Each line: '- **Name** https://url . positioning . price: $X/mo | no public price . complaints: ...'.
+  Use only public pages.
+read:
+- docs/decisions.md
+allowed_paths:
+- research/competitors.md
+outputs:
+- research/competitors.md
+acceptance:
+- cmd: python acceptance/check_research.py competitors
+notes: 'Line format is checked: must contain an http(s) URL and the literal ''price:'' followed by $, a number or ''no public price''.'

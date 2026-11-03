@@ -1,0 +1,28 @@
+id: C-010
+title: 'Market Worker: collector'
+type: normal
+goal: |-
+  Cloudflare Worker (plain JS, ES modules, no dependencies) with POST /e, POST /action, POST /interview, GET /health.
+  Stores to D1 binding env.DB (table events). No IP storage; first-party pseudonymous visitor id only; reject unknown experiment ids;
+  per-visitor and global daily caps (env.DAILY_CAP default 2000: when reached return 429 and stop storing: never bill); replay protection by event id;
+  CORS limited to env.ALLOWED_ORIGINS; DELETE /visitor/:id deletes a visitor's rows; scheduled() deletes raw rows older than 90 days.
+provides:
+- 'worker/src/index.js: default export {fetch(req, env), scheduled(evt, env)}'
+- 'POST /e {experiment, visitor, type, ts, source?} -> 204; POST /action {experiment, visitor, kind, payload, id} -> 204; GET /export?key=<EXPORT_KEY> -> JSON counts per experiment {qualified_visits, primary_successes, by_source, first_event}'
+read:
+- docs/decisions.md
+allowed_paths:
+- worker/src/**
+- worker/test/collector.test.js
+- worker/wrangler.toml
+- worker/package.json
+- worker/schema.sql
+outputs:
+- worker/src/index.js
+- worker/test/collector.test.js
+- worker/wrangler.toml
+- worker/package.json
+- worker/schema.sql
+acceptance:
+- cmd: node --test worker/test/collector.test.js
+notes: wrangler.toml [vars] must define EXPERIMENTS = "E-001,E-002,E-003" (the experiment allowlist) and EXPORT_KEY must come from a secret, never a var. Test with an in-memory fake D1 (prepare/bind/run/all/first). Use node:test only. 'Qualified visit' = a visit event followed by a view event from the same visitor. Primary success = an /action whose kind equals the experiment's declared success kind passed in payload.kind and whose payload has >=50 words when kind=use_case.
