@@ -1,0 +1,8 @@
+# Stop rules, fixed before launch.
+experiment: EXPERIMENT_ID
+stop_if:
+  - spend_exceeds_usd: 0
+  - days_elapsed: 14
+  - visitors_exceed: 500
+  - complaint_about_privacy_or_wording: true
+on_stop: "take the page offline, record the result, do not extend"

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="ml-worker-url" content="MARKET_WORKER_URL">
+<meta name="ml-experiment-id" content="EXPERIMENT_ID">
+<title>Experiment title</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+  section, footer { margin: 1.5rem 0; }
+  .box { border: 1px solid #999; border-radius: 6px; padding: .75rem 1rem; }
+  button { font: inherit; padding: .4rem .9rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Headline that states the one thing this offers</h1>
+  <p>One or two sentences on who it is for and what problem it addresses.</p>
+</header>
+
+<main>
+  <section>
+    <button type="button" data-action="primary">Request early access</button>
+  </section>
+
+  <section class="box">
+    <h2>Early access: what is real</h2>
+    <p data-honesty>Status: not built yet, this page tests interest. Expected YYYY-MM-DD. Nothing is charged, no account is created, and nothing is collected beyond what the privacy notice lists.</p>
+  </section>
+</main>
+
+<div data-consent class="box" hidden>
+  <p>May we count your visit and your click anonymously? Declining changes nothing about the page.</p>
+  <button type="button" data-consent-accept>Accept</button>
+  <button type="button" data-consent-decline>Decline</button>
+</div>
+
+<footer>
+  <p data-disclosure>Disclosure: this is a small experiment run by the Marketlab team to test whether an idea is worth building.</p>
+  <p data-ai-disclosure>AI disclosure: the text and tooling of this page were produced with AI assistance and reviewed by the team.</p>
+  <p data-privacy-notice>Privacy: only after you accept, we store a random visitor id in your browser and send the experiment id, that id, the event type, a timestamp and the source tag from the link you used. No IP address is stored by us, no cookies, no third-party services.</p>
+</footer>
+
+<script src="track.js"></script>
+</body>
+</html>
