@@ -1,0 +1,40 @@
+id: C-008
+title: Ranking inputs and aggregate check (v2)
+type: normal
+goal: |-
+  Write research/rank_inputs.yaml with, for each of H-001..H-003: reachability (0-5, via free channels), team_edge (0-5), build_days,
+  and a one-line 'reason' for each score. The gate runs the aggregate research checks and rank.py --check. Replaces C-005, which waited on fewer research cells.
+inputs:
+- from: C-001
+  kind: implementation
+  contract: research/signals/<file>.jsonl or research/competitors.md exists and is merged.
+- from: C-002
+  kind: implementation
+  contract: research/signals/<file>.jsonl or research/competitors.md exists and is merged.
+- from: C-003
+  kind: implementation
+  contract: research/signals/<file>.jsonl or research/competitors.md exists and is merged.
+- from: C-004
+  kind: implementation
+  contract: research/signals/<file>.jsonl or research/competitors.md exists and is merged.
+- from: C-006
+  kind: implementation
+  contract: research/signals/<file>.jsonl or research/competitors.md exists and is merged.
+- from: C-007
+  kind: implementation
+  contract: research/signals/<file>.jsonl or research/competitors.md exists and is merged.
+read:
+- docs/decisions.md
+allowed_paths:
+- research/rank_inputs.yaml
+outputs:
+- research/rank_inputs.yaml
+acceptance:
+- cmd: python acceptance/check_research.py aggregate
+- cmd: python acceptance/rank.py --check
+notes: 'Team edge: use 3 and say so in ''reason'' unless docs/decisions.md says otherwise. In each reason, state
+  how many DIRECT vs adjacent signals support the hypothesis (count by reading the signal files). If the aggregate
+  check fails (too few signals or a domain over 40%), call cell_signal feedback with the exact shortfall; never
+  edit signal files.'
+supersedes:
+- C-005
