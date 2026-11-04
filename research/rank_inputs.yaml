@@ -1,0 +1,17 @@
+# Ranking inputs for round 1 (D-003). Scores 0-5. Signal counts are rows in research/signals/*.jsonl,
+# counted by reading the files: DIRECT = the pain is the hypothesis itself; adjacent = related context-loss/limit pain.
+H-001:
+  reachability: 4
+  team_edge: 3
+  build_days: 3
+  reason: "Reachability 4: the pain is voiced in free public places (GitHub issues, Reddit, HN, Cursor/OpenAI forums) where we can reply and post; team_edge 3 is the D-004 default; build_days 3 assumes Blueprint core already coordinates parallel sessions so only a demo and a landing page are needed; signals: 27 rows DIRECT (about 22 distinct URLs, parallel sessions colliding on one repo) vs 27 adjacent (usage limits, rate limits, context loss, large-repo reviews)."
+H-002:
+  reachability: 3
+  team_edge: 3
+  build_days: 6
+  reason: "Reachability 3: an offer to take a repo can be posted free but needs trust before people hand over code; team_edge 3 is the D-004 default; build_days 6 because each pilot repo needs real delivered work; signals: 0 DIRECT (nobody asks for free delivered work on their repo) vs 18 adjacent (plans lost to compaction, wanting epics broken into tasks, brownfield spec setup)."
+H-003:
+  reachability: 4
+  team_edge: 3
+  build_days: 2
+  reason: "Reachability 4: GitHub, Reddit and dev.to accept free template posts; team_edge 3 is the D-004 default; build_days 2 since the pack is mostly files and docs; signals: 24 DIRECT (people publishing or asking for CLAUDE.md/plan/handoff templates, only 1 paid-pack signal) vs 16 adjacent (context loss and chat limits without a template ask); many free templates already exist, so differentiation is the risk."
